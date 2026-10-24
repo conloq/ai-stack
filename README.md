@@ -10,7 +10,7 @@ Referência única do stack de ferramentas do projeto: harnesses de código, ski
 1. [Visão geral](#1-visão-geral)
 2. [Diretório oficial de links](#2-diretório-oficial-de-links)
 3. [Harnesses e agentes de programação](#3-harnesses-e-agentes-de-programação)
-4. [Skills e contexto dos agentes](#4-skills-e-contexto-dos-agentes)
+4. [Contexto do agente](#4-contexto-do-agente)
 5. [GitHub e fluxo de desenvolvimento](#5-github-e-fluxo-de-desenvolvimento)
 6. [Artigo científico e pesquisa](#6-artigo-científico-e-pesquisa)
 7. [Documentação](#7-documentação)
@@ -38,7 +38,7 @@ As ferramentas do projeto se dividem em camadas com papéis diferentes. Confundi
 | Camada | O que faz | Exemplos no projeto |
 |---|---|---|
 | Harness | conduz a conversa, edita arquivos, executa comandos e chama ferramentas | OMP, OpenCode, Freebuff, Kilo Code |
-| Skills e contexto | dão procedimento e regras ao agente | `.agents/skills/`, `AGENTS.md`, `docs/codebase/` |
+| Contexto do agente | dão regra, procedimento, ferramenta e índice ao agente | `.agents/skills/`, `AGENTS.md`, MCP, `docs/codebase/` |
 | Fluxo de trabalho | organiza demanda, revisão e entrega | GitHub, Issues, Pull Requests, Projects |
 | Produção de conteúdo | pesquisa, escrita, design | Elicit, Oleafly, Pen.dev, Figma |
 | Catálogo | descobre o que existe e o que é gratuito | FreeTokens.fyi, FreeLLM.net |
@@ -77,6 +77,16 @@ Esta é a fonte única dos links. As seções seguintes descrevem papel e classi
 | `npx skills` (CLI) | https://skills.sh/ | https://github.com/vercel-labs/skills/tree/main/docs | https://github.com/vercel-labs/skills |
 
 A especificação aberta seguida pelas skills, comum aos agentes, está em https://agentskills.io.
+
+### Contexto do agente, MCP e disciplina de código
+
+| Ferramenta | Site | Documentação | Repositório oficial |
+|---|---|---|---|
+| MCP (Model Context Protocol) | https://modelcontextprotocol.io/ | https://modelcontextprotocol.io/docs | https://github.com/modelcontextprotocol/modelcontextprotocol |
+| graphify | Site dedicado: não encontrado/confirmado (o repositório é a referência publicada) | https://github.com/Graphify-Labs/graphify#readme | https://github.com/Graphify-Labs/graphify |
+| Ponytail | https://ponytail.dev/ | https://github.com/DietrichGebert/ponytail/blob/main/INSTALL.md e o README do repositório | https://github.com/DietrichGebert/ponytail |
+
+Configuração de MCP por harness: OMP em https://omp.sh/docs/mcp e OpenCode em https://opencode.ai/docs/mcp-servers/.
 
 ### Artigo científico
 
@@ -180,16 +190,37 @@ Ferramentas especializadas e complementares. Não são o harness principal do pr
 - Codex: agente de código em terminal, com integração à conta OpenAI.
 - Claude Code: agente de código em terminal, com integração à conta Anthropic.
 
-## 4. Skills e contexto dos agentes
+## 4. Contexto do agente
 
-Fonte canônica: `.agents/skills/`. Cada skill é um procedimento reutilizável, com regras que o agente deve seguir antes de agir. As skills abaixo são as que existem no projeto na data deste documento; a lista real é sempre a do diretório.
+O agente decide e escreve com o que estiver no contexto dele. Quatro camadas fornecem esse contexto, e cada uma tem um dono diferente:
+
+| Camada | O que fornece | Onde vive |
+|---|---|---|
+| Regras do repositório | convenções, comandos, limites e proibições | `AGENTS.md` de cada repositório |
+| Skills | procedimento reutilizável para um tipo de tarefa | `.agents/skills/` no projeto; `npx skills` para as externas |
+| MCP | ferramentas e dados externos consultados sob demanda | configuração de MCP do harness, `.omp/mcp.json` no projeto |
+| Índice e documentação do código | navegação, busca e arquitetura | `docs/codebase/`, `graphify-out/` |
+
+Cada camada resolve um problema diferente. `AGENTS.md` diz o que vale em qualquer tarefa; skill diz como executar um tipo de tarefa; MCP entrega ferramenta ou dado que o agente não tem; índice encurta a busca no código. O mesmo conteúdo repetido em duas camadas gera conflito, porque a instrução mais próxima do turno vence.
+
+### AGENTS.md e `/init`
+
+`AGENTS.md`, na raiz do repositório, é a fonte única das regras daquele repositório: comandos que funcionam, convenções de código, o que nunca fazer e onde ficam as decisões. `CLAUDE.md` apenas importa ou aponta para ele, para não existirem duas cópias.
+
+`/init` é o comando embutido do OMP e do OpenCode que cria ou melhora o `AGENTS.md` a partir do que o agente lê no repositório. A saída é rascunho: regra errada muda o comportamento em toda tarefa, então a revisão é humana e o arquivo entra em commit como qualquer outra mudança.
+
+Regra prática: `AGENTS.md` curto e específico. O que muda a cada sprint fica na issue ou no documento de estado, não no arquivo de regras.
+
+### Skills do projeto
+
+Fonte canônica: `.agents/skills/`. Cada skill é um procedimento reutilizável, com regras que o agente deve seguir antes de agir. As skills abaixo são as que o projeto adota na data deste documento; a lista real é sempre a do diretório.
 
 Há duas origens de skill, e elas não se misturam:
 
 - **Skills do projeto:** escritas para este repositório, vivem em `.agents/skills/` e são versionadas. São as listadas nesta seção.
 - **Skills externas:** vêm de repositórios de terceiros e são instaladas pelo CLI `npx skills`. O procedimento, os alvos e a coleção recomendada por área estão na seção 18.
 
-### Processo, board e priorização
+#### Processo, board e priorização
 
 | Skill | Quando usar |
 |---|---|
@@ -202,7 +233,7 @@ Há duas origens de skill, e elas não se misturam:
 | `pm-ab-test-analysis` | analisar resultado de experimento |
 | `pm-analyze-feature-requests` | triar e priorizar pedidos de funcionalidade |
 
-### GitHub, PR e entrega
+#### GitHub, PR e entrega
 
 | Skill | Quando usar |
 |---|---|
@@ -212,7 +243,7 @@ Há duas origens de skill, e elas não se misturam:
 | `mash-branch-protection-gh-cli` | conferir ou aplicar proteção de branch |
 | `mash-conferir-entrega` | comparar o que um integrante entregou com a issue |
 
-### Backend, contrato e segurança
+#### Backend, contrato e segurança
 
 | Skill | Quando usar |
 |---|---|
@@ -220,7 +251,7 @@ Há duas origens de skill, e elas não se misturam:
 | `mash-conferir-entrega` | validar entrega contra o contrato da issue |
 | `code-review` | revisão de código com foco em regressão e segurança |
 
-### Documentação e texto
+#### Documentação e texto
 
 | Skill | Quando usar |
 |---|---|
@@ -228,32 +259,60 @@ Há duas origens de skill, e elas não se misturam:
 | `mash-texto-sem-slop` | remover marcas de texto gerado por IA em pt-BR |
 | `mash-handoff-pessoa` | criar ou atualizar handoff de uma pessoa |
 
-### Artigo
+#### Artigo
 
 | Skill | Quando usar |
 |---|---|
 | `article-academic-review` | revisar artigo do PI: citações, afirmações conflitantes, estrutura e metadados |
 
-### Exploração de código
+#### Exploração de código
 
 | Skill | Quando usar |
 |---|---|
-| `graphify` | consultar o grafo de conhecimento do repositório |
-| `gitnexus-exploring` | entender arquitetura e fluxo de execução |
-| `gitnexus-debugging` | rastrear a origem de um erro |
-| `gitnexus-impact-analysis` | medir o que quebra antes de editar |
-| `gitnexus-refactoring` | renomear, extrair ou mover código com segurança |
-| `gitnexus-cli` | indexar, reindexar e gerar wiki |
-| `gitnexus-guide` | consultar o funcionamento do próprio GitNexus |
-| `gitnexus-area-back-end` | contexto da área de Back-End |
-| `gitnexus-area-landing-page-conloq` | contexto da landing page |
-| `gitnexus-area-tools` | contexto das ferramentas |
+| `graphify` | consultar o grafo de conhecimento gerado em `graphify-out/` |
 
-### Contexto que acompanha as skills
+O `graphify` está em validação: a CLI está instalada e o grafo existe, mas a adoção como índice oficial do projeto ainda não foi decidida. Enquanto a validação não termina, o caminho de leitura que não depende dele é o código e `docs/codebase/`. GitNexus e CodeGraph não fazem parte do stack e não têm seção neste documento.
+
+### Disciplina de código: Ponytail
+
+Ponytail não é skill de tarefa: é uma camada de disciplina que fica ativa durante a sessão e empurra o agente para a menor mudança que resolve o problema, com a menor quantidade de código novo.
+
+| Nível | Comportamento |
+|---|---|
+| `lite` | constrói o que foi pedido e cita em uma linha a opção menor, deixando a escolha para quem pediu |
+| `full` | padrão: menor mudança completa, sem abstração, dependência nova ou código para depois |
+| `ultra` | questiona o pedido antes de construir e aponta a parte que a necessidade não justifica |
+| `off` | desliga as regras |
+
+- Ativa por sessão. Troca de nível com `/ponytail lite`, `/ponytail full`, `/ponytail ultra` ou `/ponytail off`; sem argumento, informa o nível atual.
+- `/ponytail-review` revisa a mudança atual, `/ponytail-audit` revisa o repositório inteiro, `/ponytail-debt` recolhe os comentários `shortcut:` em uma lista, `/ponytail-gain` mostra o placar medido e `/ponytail-help` resume os comandos.
+- A regra não corta validação em fronteira de confiança, tratamento de erro que evita perda de dado, segurança, acessibilidade nem o que foi pedido.
+- Convivência com as skills do projeto: a skill diz como fazer a tarefa; Ponytail limita o tamanho da solução. Nenhuma das duas substitui a outra.
+
+Instalação e comandos ficam na seção 18.
+
+### MCP
+
+MCP (Model Context Protocol) é o protocolo que expõe ferramentas e fontes de dado ao agente como servidores. O agente descobre o que cada servidor oferece e chama só o que a tarefa exige, em vez de carregar o conteúdo inteiro no prompt.
+
+- O servidor é declarado na configuração do harness. No OMP o arquivo do projeto é `.omp/mcp.json`; no OpenCode é a chave `mcp` do `opencode.json`.
+- `stdio` sobe um processo local e serve para índice de código na própria máquina. HTTP e SSE apontam para serviço remoto.
+- Um servidor por fonte de contexto. Dois servidores que indexam o mesmo código competem entre si e confundem a escolha do agente.
+
+Estado no projeto:
+
+| Servidor | Situação | Como consultar |
+|---|---|---|
+| `graphify` | em validação | CLI `graphify query`, `graphify path` e `graphify explain` sobre `graphify-out/graph.json` |
+
+A entrada MCP do graphify chama o binário `graphify-mcp`, que não está instalado. Enquanto ele não existir, o servidor não sobe e a consulta é feita pela CLI. O grafo só é atualizado por `graphify update .`; grafo velho responde com estrutura velha.
+
+### Documentação de apoio
 
 - `AGENTS.md`: regras do repositório para o agente, com fonte única por repositório.
 - `docs/codebase/`: arquitetura, convenções, integrações, testes e riscos do repositório.
 - `codemap.md`: mapa de navegação do código, quando existir.
+- `graphify-out/`: grafo, relatório e wiki gerados pela CLI do graphify; o wiki só existe depois de gerado, e nada no fluxo depende dele.
 
 Skill ensina procedimento. Estado atual, números de issue, SHAs, rotas e opções de campo ficam nas fontes canônicas: código, issue do roteiro e GitHub.
 
@@ -501,6 +560,7 @@ Cada bloco abaixo tem a mesma estrutura: harness, skills do projeto (`.agents/sk
 | Harness | OMP; OpenCode como alternativa |
 | Skills do projeto | `mash-contrato-api` antes de escrever rota, `code-review` antes do merge, `mash-conferir-entrega`, `ci-watch-loop` |
 | Skills externas | `nodejs-backend-patterns`, `api-and-interface-design`, `mysql`, `sequelize`, `security-review` |
+| Disciplina de código | Ponytail em `full`; `/ponytail-review` antes do merge |
 | Ferramentas | GitHub e GitHub CLI, a issue da rota como contrato, migrations do Sequelize (`npm run db:migrate`) |
 | Portão de entrega | contrato aprovado na issue antes do código, testes do caminho felizes e dos erros, review antes do merge, nenhuma credencial no código |
 
@@ -511,6 +571,7 @@ Cada bloco abaixo tem a mesma estrutura: harness, skills do projeto (`.agents/sk
 | Harness | OMP; OpenCode como alternativa |
 | Skills do projeto | `code-review`, `mash-contrato-api` para o consumo da API, `ci-watch-loop` |
 | Skills externas | `tailwind-4-docs`, `accessibility`, `web-design-guidelines`, `webapp-testing` |
+| Disciplina de código | Ponytail em `full`; `/ponytail-review` antes do merge |
 | Ferramentas | Pen.dev para exploração, Figma para o design aprovado, preview na porta 4000 contra a API na 8080 |
 | Portão de entrega | aderência ao design aprovado e ao Design System, QA no navegador, nenhuma tela redesenhada sem issue |
 
@@ -577,7 +638,7 @@ Os diretórios nativos do OMP (`.omp/skills/` e `~/.omp/agent/skills/`) não sã
 | Projeto (padrão) | grava em `.agents/skills/` ou `.claude/skills/`, dentro do repositório | a equipe adotou a skill e ela deve ser versionada |
 | Global (`-g`) | grava no diretório do usuário, fora do repositório | teste e uso individual |
 
-No repositório de coordenação do projeto, `.agents/skills/` é versionado e concentra as 28 skills do projeto. Instalar em escopo de projeto mistura skill externa com skill interna no mesmo diretório, e o resultado vai para o commit. O caminho seguro é testar com `-g` e só promover para o projeto depois de ler o `SKILL.md` e revisar o diff.
+No repositório de coordenação do projeto, `.agents/skills/` é versionado e concentra as skills do projeto. Instalar em escopo de projeto mistura skill externa com skill interna no mesmo diretório, e o resultado vai para o commit. O caminho seguro é testar com `-g` e só promover para o projeto depois de ler o `SKILL.md` e revisar o diff.
 
 ### Comandos
 
@@ -662,13 +723,58 @@ npx skills add anthropics/skills --skill webapp-testing -a pi -a opencode -a cla
 
 Nesse formato a skill entra em `.agents/skills/` e o Claude Code recebe um link em `.claude/skills/`. O commit precisa passar por review, porque `SKILL.md` é instrução executada pelo agente, com o mesmo risco de um script.
 
+### Ponytail: skills pelo `npx skills`
+
+Ponytail é plugin, não uma skill avulsa: o ruleset fica ativo a cada turno e os comandos `/ponytail-*` vêm do plugin. Baixar as seis skills pelo `npx skills` entrega o procedimento sem o ruleset sempre ativo, e é o caminho quando o harness não aceita plugin.
+
+As seis skills, no alvo do OMP e em escopo global:
+
+```bash
+npx skills add DietrichGebert/ponytail --skill '*' -a pi -g -y
+```
+
+Uma por vez:
+
+```bash
+npx skills add DietrichGebert/ponytail --skill ponytail -a pi -g -y
+npx skills add DietrichGebert/ponytail --skill ponytail-review -a pi -g -y
+npx skills add DietrichGebert/ponytail --skill ponytail-audit -a pi -g -y
+npx skills add DietrichGebert/ponytail --skill ponytail-debt -a pi -g -y
+npx skills add DietrichGebert/ponytail --skill ponytail-gain -a pi -g -y
+npx skills add DietrichGebert/ponytail --skill ponytail-help -a pi -g -y
+```
+
+Para deixar as skills versionadas no projeto, o comando perde o `-g` e ganha os agentes do repositório:
+
+```bash
+npx skills add DietrichGebert/ponytail --skill '*' -a pi -a opencode -a claude-code -y
+```
+
+Diferença entre as duas rotas:
+
+| Rota | O que instala | Nível e comandos |
+|---|---|---|
+| `npx skills add DietrichGebert/ponytail --skill '*'` | as seis skills em `.agents/skills/` ou `~/.agents/skills/` | não; o comportamento vem do `SKILL.md` carregado |
+| plugin | skills, hooks e ruleset ativo por turno | sim; `/ponytail` e `/ponytail-*` |
+
+Instalação como plugin, por harness:
+
+| Harness | Comando |
+|---|---|
+| Claude Code | `/plugin marketplace add DietrichGebert/ponytail` e depois `/plugin install ponytail@ponytail` |
+| OMP | `omp plugin marketplace add DietrichGebert/ponytail` e `omp plugin install ponytail@ponytail` |
+| OpenCode | `opencode plugin add @dietrichgebert/ponytail`, ou `"plugins": ["@dietrichgebert/ponytail"]` no `opencode.json` |
+| Codex | `codex plugin marketplace add DietrichGebert/ponytail` e `codex plugin add ponytail@ponytail`; depois confiar nos dois hooks em `/hooks` |
+
+Depois de instalar como plugin, abrir sessão nova e rodar `/ponytail full`. O plugin oficial vem de `DietrichGebert/ponytail` no GitHub ou `@dietrichgebert/ponytail` no npm; cópia de outro pacote com o mesmo nome não é o original.
+
 ### Regras de convivência
 
 - skill externa não substitui skill do projeto: contrato, board, estado e texto continuam nas internas;
 - skill que contradiga decisão registrada não entra, mesmo com muitas instalações no catálogo;
 - `SKILL.md` é lido antes da adoção, incluindo scripts e arquivos que ele referencia;
 - `skills-lock.json` registra a origem e não é editado à mão;
-- instalação com `--all` ou `--skill '*'` só em repositório conhecido, e nunca no escopo de projeto sem revisão;
+- instalação com `--skill '*'` só em repositório conhecido, e nunca no escopo de projeto sem revisão;
 - skill externa que deixou de ser usada é removida com `npx skills remove`, para não inflar o contexto do agente.
 
 ### Problemas comuns
@@ -689,6 +795,9 @@ Nesse formato a skill entra em `.agents/skills/` e o Claude Code recebe um link 
 | Alternativa de desenvolvimento | OpenCode |
 | Skills do projeto | `.agents/skills/` |
 | Skills externas | `npx skills` |
+| Disciplina de código | Ponytail |
+| Contexto externo | MCP |
+| Índice de código | graphify (em validação) |
 | Coding gratuito | Freebuff ou Kilo Code |
 | Artigo: pesquisa | Elicit |
 | Artigo: escrita | Oleafly |
@@ -757,6 +866,9 @@ Ferramenta sem repositório público oficial confirmado entra com essa ressalva 
 - Alternativa open source: https://opencode.ai/docs/
 - Skills do projeto: `.agents/skills/`
 - Skills externas: https://skills.sh/
+- Disciplina de código: https://ponytail.dev/
+- MCP: https://modelcontextprotocol.io/docs
+- Índice de código: https://github.com/Graphify-Labs/graphify
 - Fluxo do projeto: https://github.com/conloq
 - Escrita acadêmica: https://oleafly.com/docs
 - Design colaborativo: https://www.figma.com/
