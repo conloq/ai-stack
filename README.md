@@ -3,6 +3,7 @@
 Referência única do stack de ferramentas do projeto: harnesses de código, skills, fluxo no GitHub, artigo científico, documentação, design, frontend, backend, catálogos de modelos gratuitos, agregadores, gateways, provedores e modelos locais.
 
 **Última verificação de links:** 24/10/2026.
+**Última revisão do conteúdo:** 02/11/2026.
 **Escopo:** documentação. Este arquivo descreve ferramentas; não configura nenhuma delas.
 
 ## Sumário
@@ -213,25 +214,24 @@ Regra prática: `AGENTS.md` curto e específico. O que muda a cada sprint fica n
 
 ### Skills do projeto
 
-Fonte canônica: `.agents/skills/`. Cada skill é um procedimento reutilizável, com regras que o agente deve seguir antes de agir. As skills abaixo são as que o projeto adota na data deste documento; a lista real é sempre a do diretório.
+Os arquivos das skills ficam em `.agents/skills/` no repositório de coordenação; este repositório de referência não contém esses procedimentos. O catálogo abaixo foi conferido em 02/11/2026 contra o `main` do repositório de coordenação, commit `ce22145` (18 skills). Atualize este catálogo quando uma mudança publicada alterar nomes ou responsabilidades.
 
 Há duas origens de skill, e elas não se misturam:
 
-- **Skills do projeto:** escritas para este repositório, vivem em `.agents/skills/` e são versionadas. São as listadas nesta seção.
+- **Skills do projeto:** procedimentos versionados em `.agents/skills/` no repositório de coordenação; esta seção resume nomes e usos.
 - **Skills externas:** vêm de repositórios de terceiros e são instaladas pelo CLI `npx skills`. O procedimento, os alvos e a coleção recomendada por área estão na seção 18.
 
 #### Processo, board e priorização
 
 | Skill | Quando usar |
 |---|---|
+| `gaps` | organizar o trabalho e encaminhar criação, refinamento ou divisão de issues pelo fluxo GAPS |
 | `gaps-agile-governance` | interpretar regra do curso GAPS e suas exceções |
 | `gaps-dor-board-checklist` | validar uma issue, checar se está pronta ou cumpre o DoR |
-| `gaps-issue-refinement` | criar, refinar ou dividir uma issue em GAPS |
 | `issue-validation-stamp` | reutilizar, invalidar ou registrar uma validação anterior |
 | `github-board-audit-cycle` | auditar o board inteiro |
 | `github-projects-v2-ops` | aplicar escrita em Issues e no Project |
-| `pm-ab-test-analysis` | analisar resultado de experimento |
-| `pm-analyze-feature-requests` | triar e priorizar pedidos de funcionalidade |
+| `project-work-planning` | planejar trabalho quando nenhum fluxo específico do projeto é responsável |
 
 #### GitHub, PR e entrega
 
@@ -239,17 +239,15 @@ Há duas origens de skill, e elas não se misturam:
 |---|---|
 | `coordenacao-commit-seguro` | preparar commit e PR sem incluir trabalho não autorizado |
 | `code-review` | revisar mudança de código |
-| `ci-watch-loop` | acompanhar e corrigir checks de CI até ficarem verdes |
+| `ci-watch-loop` | acompanhar os checks de CI do HEAD atual até uma conclusão verificável |
 | `mash-branch-protection-gh-cli` | conferir ou aplicar proteção de branch |
-| `mash-conferir-entrega` | comparar o que um integrante entregou com a issue |
+| `delivery-quality-gate` | comparar uma entrega com a issue, o código e as evidências disponíveis |
 
-#### Backend, contrato e segurança
+#### API e contratos
 
 | Skill | Quando usar |
 |---|---|
 | `mash-contrato-api` | escrever ou revisar contrato de rota, status, corpo e nomenclatura |
-| `mash-conferir-entrega` | validar entrega contra o contrato da issue |
-| `code-review` | revisão de código com foco em regressão e segurança |
 
 #### Documentação e texto
 
@@ -258,11 +256,6 @@ Há duas origens de skill, e elas não se misturam:
 | `docs-state-canonical` | sincronizar documentação com a fonte canônica |
 | `mash-texto-sem-slop` | remover marcas de texto gerado por IA em pt-BR |
 | `mash-handoff-pessoa` | criar ou atualizar handoff de uma pessoa |
-
-#### Artigo
-
-| Skill | Quando usar |
-|---|---|
 | `article-academic-review` | revisar artigo do PI: citações, afirmações conflitantes, estrutura e metadados |
 
 #### Exploração de código
@@ -305,7 +298,7 @@ Estado no projeto:
 |---|---|---|
 | `graphify` | em validação | CLI `graphify query`, `graphify path` e `graphify explain` sobre `graphify-out/graph.json` |
 
-A entrada MCP do graphify chama o binário `graphify-mcp`, que não está instalado. Enquanto ele não existir, o servidor não sobe e a consulta é feita pela CLI. O grafo só é atualizado por `graphify update .`; grafo velho responde com estrutura velha.
+O arquivo `.omp/mcp.json` do repositório de coordenação não declara um servidor Graphify. Neste ambiente, o OpenCode tem uma configuração global remota para Graphify; ela é individual e não representa configuração compartilhada do projeto. A consulta de referência continua disponível pela CLI `graphify`. Até haver uma decisão de configuração versionada para o time, não descreva um MCP local `graphify-mcp` como parte do stack do projeto. O grafo é atualizado por `graphify update .`; um grafo desatualizado representa uma estrutura antiga.
 
 ### Documentação de apoio
 
@@ -551,14 +544,14 @@ Regras:
 
 A stack da seção 19 é uma só. O que muda por área é a combinação de harness, skills e ferramentas, e o portão que a entrega precisa atravessar antes do merge ou da publicação.
 
-Cada bloco abaixo tem a mesma estrutura: harness, skills do projeto (`.agents/skills/`), skills externas opcionais, ferramentas e portão de entrega. As skills externas só entram depois do procedimento da seção 18.
+Cada bloco abaixo tem a mesma estrutura: harness, skills do projeto (com arquivos-fonte no repositório de coordenação), skills externas opcionais, ferramentas e portão de entrega. As skills externas só entram depois do procedimento da seção 18.
 
 ### Backend
 
 | Item | Recomendação |
 |---|---|
 | Harness | OMP; OpenCode como alternativa |
-| Skills do projeto | `mash-contrato-api` antes de escrever rota, `code-review` antes do merge, `mash-conferir-entrega`, `ci-watch-loop` |
+| Skills do projeto | `mash-contrato-api` antes de escrever rota, `code-review` antes do merge, `delivery-quality-gate` para verificar a entrega, `ci-watch-loop` |
 | Skills externas | `nodejs-backend-patterns`, `api-and-interface-design`, `mysql`, `sequelize`, `security-review` |
 | Disciplina de código | Ponytail em `full`; `/ponytail-review` antes do merge |
 | Ferramentas | GitHub e GitHub CLI, a issue da rota como contrato, migrations do Sequelize (`npm run db:migrate`) |
